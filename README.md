@@ -1,2 +1,2 @@
 # MeiseCSI
-MeiseBG Crop Source Invesigations platform
+MeiseBG Crop Source Investigations platform
