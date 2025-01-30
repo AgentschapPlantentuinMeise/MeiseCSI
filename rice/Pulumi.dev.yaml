@@ -1,6 +1,0 @@
-config:
-  aws:region: eu-west-3
-  mcsi:myEnvironment: development
-  mcsi:costCenter: ATE21300
-  mcsi:dbKey:
-    secure: AAABAB1ttkiouVKlTE8skBFdz4wJSNnD0611Mu1dDihcB0szIlAa/3YuabQtKD9wGNjN
