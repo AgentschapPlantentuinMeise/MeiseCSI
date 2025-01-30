@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mbg.csi"
+version = "0.1.0"
+description = "Meise Botanic Garden Crop Source Investigations"
+readme = "README.md"
+requires-python = ">=3.6"
+license = {text = "MIT"}
+dependencies = [
+    'flask',
+    'Flask-IAM',
+    'pandas',
+    'requests',
+    'matplotlib',
+    'seaborn',
+    'scikit-learn',
+    'folium',
+    'pyproj',
+    'shapely',
+    'celery[sqlalchemy]',
+]
+
+[project.urls]
+homepage = "https://www.mcsi.guardin.net"
+repository = "https://github.com/AgentschapPlantentuinMeise/MeiseCSI"
+documentation = "https://github.com/AgentschapPlantentuinMeise/MeiseCSI/docs"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "flake8",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true

@@ -3,6 +3,11 @@ MeiseBG Crop Source Investigations platform
 
 ## Reproducible Infrastructure as Code
 
+You can install pulumi with the package manager of your OS
+ - MacOS: `brew install pulumi/tap/pulumi`
+ - Windows: `choco install pulumi`
+ - Linux: `curl -fsSL https://get.pulumi.com | sh`
+
 ### Starting up
 
     mkdir rice
@@ -15,3 +20,7 @@ MeiseBG Crop Source Investigations platform
     cd rice
     pulumi up
 
+### Create environment for secrets
+
+    pulumi env init mcsi/dev
+    
