@@ -1,0 +1,10 @@
+name: mcsi
+runtime:
+  name: python
+  options:
+    virtualenv: venv
+description: MeiseBG Crop Source Investigations platform
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: ""
