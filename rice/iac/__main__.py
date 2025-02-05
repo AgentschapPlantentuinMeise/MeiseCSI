@@ -102,17 +102,18 @@ key_pair = aws.ec2.KeyPair('mcsi-key-pair', public_key=public_key)
 pulumi.export('key_pair_name', key_pair.key_name)
 
 ## Secrets
-db_secret = aws.secretsmanager.Secret("webdbkey", description='DB key', recovery_window_in_days=0)
+# AWS secrets to expensive will work with encrypted bucket
+#db_secret = aws.secretsmanager.Secret("webdbkey", description='DB key', recovery_window_in_days=0)
 db_key_value = config.require_secret('dbKey')
-db_key_secret = db_key_value.apply(
-    lambda dbKey: aws.secretsmanager.SecretVersion("db-secret-value",
-        secret_id=db_secret.id,
-        secret_string=dbKey
-    )
-)
+#db_key_secret = db_key_value.apply(
+#    lambda dbKey: aws.secretsmanager.SecretVersion("db-secret-value",
+#        secret_id=db_secret.id,
+#        secret_string=dbKey
+#    )
+#)
 
 # Export the secret ARN (useful reference for other resources)
-pulumi.export("secret_arn", db_key_secret.arn)
+#pulumi.export("secret_arn", db_key_secret.arn)
 
 ## Installation script
 user_data = """#!/bin/bash
@@ -131,6 +132,15 @@ sudo ln -s /snap/bin/certbot /usr/bin/certbot
 sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
 sudo certbot -n --agree-tos --nginx --domains "mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
 
+# Web app
+sudo useradd -m -s /bin/bash mcsi
+sudo su -l - mcsi <<"EOF"
+  mkdir ~/repos && cd ~/repos
+  git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
+  cd MeiseCSI
+  #docker build -t localhost/web .
+EOF
+
 # Mail server
 ## hostname has to match MX record forwarding server name
 sudo bash -c 'echo mcsi.guardin.net > /etc/hostname'
@@ -142,10 +152,14 @@ sudo systemctl start postfix
 sudo systemctl enable postfix
 sudo systemctl start dovecot
 sudo systemctl enable dovecot
-#sudo bash -c "echo '@mcsi.guardin.net christophe.vanneste@plantentuinmeise.be' > /etc/postfix/virtual"
-#sudo postmap /etc/postfix/virtual
-#sudo postfix reload
 sudo postconf -e 'home_mailbox = Maildir/'
+sudo bash -c 'echo info@mcsi.guardin.net ubuntu@mcsi.guardin.net > /etc/postfix/virtual'
+# Virtual post mapping
+sudo postconf -e 'virtual_alias_domains = mcsi.guardin.net'
+sudo postconf -e 'virtual_alias_maps = hash:/etc/postfix/virtual'
+sudo postmap /etc/postfix/virtual
+sudo postfix reload
+sudo systemctl restart postfix.service
 ## SMTP
 #sudo postconf -e 'smtpd_sasl_type = dovecot'
 #sudo postconf -e 'smtpd_sasl_path = private/auth'
@@ -169,12 +183,6 @@ sudo postconf -e 'smtpd_tls_security_level = may'
 sudo postconf -e 'myhostname = mcsi.guardin.net'
 sudo systemctl restart postfix.service
 
-# Virtual post mapping
-sudo bash -c 'echo info@mcsi.guardin.net christophe.vanneste@plantentuimeise.be > /etc/postfix/virtual'
-sudo postmap /etc/postfix/virtual
-sudo postconf -e 'virtual_alias_domains = mcsi.guardin.net'
-sudo postconf -e 'virtual_alias_maps = hash:/etc/postfix/virtual'
-sudo systemctl restart postfix.service
 
 # To set dovecot password for a user
 #doveadm pw -s CRYPT -u user
