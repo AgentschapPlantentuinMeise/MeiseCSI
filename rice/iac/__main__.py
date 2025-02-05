@@ -123,8 +123,7 @@ sudo apt-get update
 sudo apt-get install -y nginx
 sudo systemctl enable nginx
 sudo systemctl start nginx
-sudo snap install docker
-#sudo docker build -t b3app https://github.com/AgentschapPlantentuinMeise/dockshop.git#binfrastructure
+sudo apt install -y docker.io
 
 # Enable ssl/https -> domain name required
 sudo snap install --classic certbot
@@ -133,12 +132,13 @@ sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christop
 sudo certbot -n --agree-tos --nginx --domains "mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
 
 # Web app
-sudo useradd -m -s /bin/bash mcsi
+sudo groupadd docker
+sudo useradd -m -s /bin/bash -G docker mcsi
 sudo su -l - mcsi <<"EOF"
   mkdir ~/repos && cd ~/repos
   git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
   cd MeiseCSI
-  #docker build -t localhost/web .
+  docker build -t localhost/webapp rice/con/Dockerfile
 EOF
 
 # Mail server
