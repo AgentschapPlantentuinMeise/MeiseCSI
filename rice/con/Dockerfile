@@ -1,4 +1,6 @@
 # syntax=docker/dockerfile:1
+# Build from git root with following command:
+# docker build -t mcsi:latest --build-context projectroot=. rice/con
 FROM python:3.12-rc-bullseye
 WORKDIR /app
 
@@ -11,7 +13,7 @@ USER app
 ENV FLASK_APP=mbg.csi:create_app
 ENV FLASK_RUN_HOST=0.0.0.0
 
-COPY . .
+COPY --from=projectroot . .
 RUN pip install .
 
 EXPOSE 5000
