@@ -119,17 +119,52 @@ db_key_value = config.require_secret('dbKey')
 user_data = """#!/bin/bash
 user_data script is executed as root
 echo 'Executed as' $(whoami) # $USER, whoami, id -nu or logname
-sudo apt-get update
-sudo apt-get install -y nginx
+sudo apt update
+sudo apt install -y nginx
 sudo systemctl enable nginx
 sudo systemctl start nginx
-sudo apt install -y docker.io
+sudo apt install -y docker.io docker-buildx
 
-# Enable ssl/https -> domain name required
-sudo snap install --classic certbot
-sudo ln -s /snap/bin/certbot /usr/bin/certbot
-sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
-sudo certbot -n --agree-tos --nginx --domains "mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
+# Python
+sudo docker run -d -p 8008:8000 --name jupyterhub quay.io/jupyterhub/jupyterhub jupyterhub \
+    --Authenticator.allow_all=True \
+    --Authenticator.admin_users='{"admin"}'
+sudo docker exec jupyterhub pip install jupyterlab
+# TODO get password from pulumi secret
+sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 'meise') admin
+sudo docker exec jupyterhub apt update
+sudo docker exec jupyterhub apt install -y r-base
+sudo docker exec jupyterhub Rscript -e 'install.packages("IRkernel"); library(IRkernel); IRkernel::installspec(user = FALSE);'
+# To list: jupyter kernelspec list
+# To remove: jupyter kernelspec remove ir
+# Container needs to restart to find new kernels
+sudo docker restart jupyterhub
+
+# Nginx
+sudo rm /etc/nginx/sites-enabled/default
+sudo sh -c "cat - > /etc/nginx/sites-enabled/mcsi" <<EOF
+server {
+    listen 80;
+    server_name www.mcsi.guardin.net;
+    client_max_body_size 50M;
+    location / {
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_pass http://localhost:8008;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+    }
+}
+EOF
+sudo systemctl restart nginx
 
 # Web app
 sudo groupadd docker
@@ -140,6 +175,11 @@ sudo su -l - mcsi <<"EOF"
   cd MeiseCSI
   docker build -t localhost/webapp rice/con/Dockerfile
 EOF
+
+# Enable ssl/https -> domain name required
+sudo snap install --classic certbot
+sudo ln -s /snap/bin/certbot /usr/bin/certbot
+sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
 
 # Mail server
 ## hostname has to match MX record forwarding server name
