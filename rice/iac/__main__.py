@@ -126,9 +126,17 @@ sudo systemctl start nginx
 sudo apt install -y docker.io docker-buildx
 
 # Python
-sudo docker run -d -p 8008:8000 --name jupyterhub quay.io/jupyterhub/jupyterhub jupyterhub \
+mkdir /home/ubuntu/notebooks
+cd /home/ubuntu/notebooks && git clone https://github.com/b-cubed-eu/fowlplay.git
+sudo docker run -d -p 8008:8000 \
+    -v /home/ubuntu/notebooks:/srv/jupyterhub/notebooks \
+    --name jupyterhub quay.io/jupyterhub/jupyterhub jupyterhub \
     --Authenticator.allow_all=True \
-    --Authenticator.admin_users='{"admin"}'
+    --Authenticator.admin_users='{"admin"}' \
+    --LocalAuthenticator.create_system_users=True \
+    --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 'workshop')'"]' \
+    --Spawner.default_url='/lab/tree/fowlplay/ducksexcube.ipynb' \
+    --Spawner.notebook_dir='/srv/jupyterhub/notebooks'
 sudo docker exec jupyterhub pip install jupyterlab
 # TODO get password from pulumi secret
 sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 'meise') admin
@@ -139,6 +147,7 @@ sudo docker exec jupyterhub Rscript -e 'install.packages("IRkernel"); library(IR
 # To remove: jupyter kernelspec remove ir
 # Container needs to restart to find new kernels
 sudo docker restart jupyterhub
+sudo docker exec jupyterhub sh -c "echo 'admin:"$(openssl passwd -6 'meise')"' | chpasswd -e"
 
 # Nginx
 sudo rm /etc/nginx/sites-enabled/default
