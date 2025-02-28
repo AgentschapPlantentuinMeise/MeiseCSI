@@ -4,3 +4,7 @@ config:
   mcsi:costCenter: ATE21300
   mcsi:dbKey:
     secure: AAABAB1ttkiouVKlTE8skBFdz4wJSNnD0611Mu1dDihcB0szIlAa/3YuabQtKD9wGNjN
+  mcsi:jupyteradminSecret:
+    secure: AAABANmoU4puiTCID97MgV7/Se/biALhH1FhIlp3xG+Df/D5lw==
+  mcsi:jupyterusersSecret:
+    secure: AAABABwMyThr3RQQhgE2x7T9s17VEPxPthXJdKDDsyIFGyv8Gbpk+g==
