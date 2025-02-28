@@ -102,18 +102,9 @@ key_pair = aws.ec2.KeyPair('mcsi-key-pair', public_key=public_key)
 pulumi.export('key_pair_name', key_pair.key_name)
 
 ## Secrets
-# AWS secrets to expensive will work with encrypted bucket
-#db_secret = aws.secretsmanager.Secret("webdbkey", description='DB key', recovery_window_in_days=0)
 db_key_value = config.require_secret('dbKey')
-#db_key_secret = db_key_value.apply(
-#    lambda dbKey: aws.secretsmanager.SecretVersion("db-secret-value",
-#        secret_id=db_secret.id,
-#        secret_string=dbKey
-#    )
-#)
-
-# Export the secret ARN (useful reference for other resources)
-#pulumi.export("secret_arn", db_key_secret.arn)
+jupyteradmin_secret = config.require_secret('jupyteradminSecret')
+jupyterusers_secret = config.require_secret('jupyterusersSecret')
 
 ## Installation script
 user_data = """#!/bin/bash
@@ -126,8 +117,10 @@ sudo systemctl start nginx
 sudo apt install -y docker.io docker-buildx
 
 # Python
-mkdir /home/ubuntu/notebooks
-cd /home/ubuntu/notebooks && git clone https://github.com/b-cubed-eu/fowlplay.git
+git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
+cp -r MeiseCSI/notebooks /home/ubuntu/notebooks
+chmod o+w /home/ubuntu/notebooks
+cd /home/ubuntu/notebooks
 sudo docker run -d -p 8008:8000 \
     -v /home/ubuntu/notebooks:/srv/jupyterhub/notebooks \
     --name jupyterhub quay.io/jupyterhub/jupyterhub jupyterhub \
@@ -135,11 +128,12 @@ sudo docker run -d -p 8008:8000 \
     --Authenticator.admin_users='{"admin"}' \
     --LocalAuthenticator.create_system_users=True \
     --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 'workshop')'"]' \
-    --Spawner.default_url='/lab/tree/fowlplay/ducksexcube.ipynb' \
+    --Spawner.default_url='/lab/tree/Welcome.ipynb' \
     --Spawner.notebook_dir='/srv/jupyterhub/notebooks'
-sudo docker exec jupyterhub pip install jupyterlab
+sudo docker exec jupyterhub pip install jupyterlab pandas seaborn statsmodels 
 # TODO get password from pulumi secret
-sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 'meise') admin
+#admin user created by jupyterhub admin_users and create_system_users combination
+#sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 'meise') admin
 sudo docker exec jupyterhub apt update
 sudo docker exec jupyterhub apt install -y r-base
 sudo docker exec jupyterhub Rscript -e 'install.packages("IRkernel"); library(IRkernel); IRkernel::installspec(user = FALSE);'
