@@ -130,11 +130,14 @@ sudo docker run -d -p 8008:8000 \
     --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 'workshop')'"]' \
     --Spawner.default_url='/lab/tree/Welcome.ipynb' \
     --Spawner.notebook_dir='/srv/jupyterhub/notebooks'
-sudo docker exec jupyterhub pip install jupyterlab pandas seaborn statsmodels ipympl
+sudo docker exec jupyterhub pip install jupyterlab pandas seaborn statsmodels ipympl pingouin
 # TODO get password from pulumi secret
 #admin user created by jupyterhub admin_users and create_system_users combination
 #sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 'meise') admin
 sudo docker exec jupyterhub apt update
+# Packages to export notebooks as pdf
+sudo docker exec jupyterhub apt install -y pandoc texlive
+# R kernel
 sudo docker exec jupyterhub apt install -y r-base
 sudo docker exec jupyterhub Rscript -e 'install.packages("IRkernel"); library(IRkernel); IRkernel::installspec(user = FALSE);'
 # To list: jupyter kernelspec list
