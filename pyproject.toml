@@ -12,6 +12,7 @@ license = {text = "MIT"}
 dependencies = [
     'flask',
     'Flask-IAM',
+    'phonenumbers',
     'pandas',
     'requests',
     'matplotlib',
@@ -21,6 +22,7 @@ dependencies = [
     'pyproj',
     'shapely',
     'celery[sqlalchemy]',
+    'gunicorn'
 ]
 
 [project.urls]

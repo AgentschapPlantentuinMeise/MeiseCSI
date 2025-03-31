@@ -20,6 +20,7 @@ import folium
 from PIL import Image
 import pandas as pd
 from celery.result import AsyncResult
+from mbg.csi import tasks
 
 def create_app(config_filename=None):
     app = Flask(__name__)
@@ -40,6 +41,14 @@ def create_app(config_filename=None):
     )
     if config_filename:
         app.config.from_pyfile(config_filename)
+
+    # Instance dir
+    if not os.path.exists(app.instance_path):
+        app.logger.warning(
+            'Instance path "%s" did not exist. Creating directory.',
+            app.instance_path
+        )
+        os.makedirs(app.instance_path)
 
     # Flask extensions
     db = SQLAlchemy()

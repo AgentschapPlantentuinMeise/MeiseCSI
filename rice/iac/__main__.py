@@ -79,6 +79,12 @@ security_group = aws.ec2.SecurityGroup(
             'from_port': 143,
             'to_port': 143,
             'cidr_blocks': ['0.0.0.0/0']
+        },
+        { # flask-dev
+            'protocol': 'tcp',
+            'from_port': 5000,
+            'to_port': 5000,
+            'cidr_blocks': ['0.0.0.0/0']
         }
     ],
     egress=[
@@ -108,7 +114,7 @@ jupyterusers_secret = config.require_secret('jupyterusersSecret')
 
 ## Installation script
 user_data = """#!/bin/bash
-user_data script is executed as root
+#user_data script is executed as root
 echo 'Executed as' $(whoami) # $USER, whoami, id -nu or logname
 sudo apt update
 sudo apt install -y nginx
@@ -180,7 +186,7 @@ sudo su -l - mcsi <<"EOF"
   mkdir ~/repos && cd ~/repos
   git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
   cd MeiseCSI
-  docker build -t localhost/webapp rice/con/Dockerfile
+  docker build -t localhost/webapp -f rice/con/Dockerfile .
 EOF
 
 # Enable ssl/https -> domain name required
