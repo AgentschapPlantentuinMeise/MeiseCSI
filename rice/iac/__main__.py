@@ -115,7 +115,8 @@ jupyterusers_secret = config.require_secret('jupyterusersSecret')
 ### To retrieve values in config, e.g. jupyteradminSecret: pulumi config get jupyteradminSecret
 
 ## Installation script
-user_data = f"""#!/bin/bash
+def create_user_data(admin_secret, users_secret):
+    return  f"""#!/bin/bash
 #user_data script is executed as root
 echo 'Executed as' $(whoami) # $USER, whoami, id -nu or logname
 sudo apt update
@@ -135,14 +136,14 @@ sudo docker run -d -p 8008:8000 \
     --Authenticator.allow_all=True \
     --Authenticator.admin_users='{{"admin"}}' \
     --LocalAuthenticator.create_system_users=True \
-    --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 '{jupyteradmin_secret}')'"]' \
+    --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 '{users_secret}')'"]' \
     --Spawner.default_url='/lab/tree/Welcome.ipynb' \
     --Spawner.notebook_dir='/srv/jupyterhub/notebooks'
 sudo docker exec jupyterhub pip install jupyterlab jupyterlab-quarto
 sudo docker exec jupyterhub pip install pandas seaborn statsmodels ipympl pingouin
 # TODO get password from pulumi secret
 #admin user created by jupyterhub admin_users and create_system_users combination
-#sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 '{jupyteradmin_secret}') admin
+#sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 '{admin_secret}') admin
 sudo docker exec jupyterhub apt update
 # Packages to export notebooks as pdf
 sudo docker exec jupyterhub apt install -y pandoc texlive
@@ -153,7 +154,7 @@ sudo docker exec jupyterhub Rscript -e 'install.packages("IRkernel"); library(IR
 # To remove: jupyter kernelspec remove ir
 # Container needs to restart to find new kernels
 sudo docker restart jupyterhub
-sudo docker exec jupyterhub sh -c "echo 'admin:"$(openssl passwd -6 '{jupyteradmin_secret}')"' | chpasswd -e"
+sudo docker exec jupyterhub sh -c "echo 'admin:"$(openssl passwd -6 '{admin_secret}')"' | chpasswd -e"
 
 # Nginx
 sudo rm /etc/nginx/sites-enabled/default
@@ -242,6 +243,13 @@ sudo systemctl restart postfix.service
 # To set dovecot password for a user
 #doveadm pw -s CRYPT -u user
 """
+
+# Use apply() to resolve the secrets before passing them into user_data
+user_data = pulumi.Output.all(
+    jupyteradmin_secret, jupyterusers_secret
+).apply(
+    lambda secrets: create_user_data(*secrets)
+)
 
 ## EC2 Instance
 server = aws.ec2.Instance(
