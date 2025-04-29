@@ -112,8 +112,10 @@ db_key_value = config.require_secret('dbKey')
 jupyteradmin_secret = config.require_secret('jupyteradminSecret')
 jupyterusers_secret = config.require_secret('jupyterusersSecret')
 
+### To retrieve values in config, e.g. jupyteradminSecret: pulumi config get jupyteradminSecret
+
 ## Installation script
-user_data = """#!/bin/bash
+user_data = f"""#!/bin/bash
 #user_data script is executed as root
 echo 'Executed as' $(whoami) # $USER, whoami, id -nu or logname
 sudo apt update
@@ -131,16 +133,16 @@ sudo docker run -d -p 8008:8000 \
     -v /home/ubuntu/notebooks:/srv/jupyterhub/notebooks \
     --name jupyterhub quay.io/jupyterhub/jupyterhub jupyterhub \
     --Authenticator.allow_all=True \
-    --Authenticator.admin_users='{"admin"}' \
+    --Authenticator.admin_users='{{"admin"}}' \
     --LocalAuthenticator.create_system_users=True \
-    --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 'workshop')'"]' \
+    --LocalAuthenticator.add_user_cmd='["useradd", "-m", "-p", "'$(openssl passwd -6 '{jupyteradmin_secret}')'"]' \
     --Spawner.default_url='/lab/tree/Welcome.ipynb' \
     --Spawner.notebook_dir='/srv/jupyterhub/notebooks'
 sudo docker exec jupyterhub pip install jupyterlab jupyterlab-quarto
 sudo docker exec jupyterhub pip install pandas seaborn statsmodels ipympl pingouin
 # TODO get password from pulumi secret
 #admin user created by jupyterhub admin_users and create_system_users combination
-#sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 'meise') admin
+#sudo docker exec jupyterhub useradd -m -p $(openssl passwd -6 '{jupyteradmin_secret}') admin
 sudo docker exec jupyterhub apt update
 # Packages to export notebooks as pdf
 sudo docker exec jupyterhub apt install -y pandoc texlive
@@ -151,16 +153,16 @@ sudo docker exec jupyterhub Rscript -e 'install.packages("IRkernel"); library(IR
 # To remove: jupyter kernelspec remove ir
 # Container needs to restart to find new kernels
 sudo docker restart jupyterhub
-sudo docker exec jupyterhub sh -c "echo 'admin:"$(openssl passwd -6 'meise')"' | chpasswd -e"
+sudo docker exec jupyterhub sh -c "echo 'admin:"$(openssl passwd -6 '{jupyteradmin_secret}')"' | chpasswd -e"
 
 # Nginx
 sudo rm /etc/nginx/sites-enabled/default
 sudo sh -c "cat - > /etc/nginx/sites-enabled/mcsi" <<EOF
-server {
+server {{
     listen 80;
     server_name www.mcsi.guardin.net;
     client_max_body_size 50M;
-    location / {
+    location / {{
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_pass http://localhost:8008;
@@ -174,8 +176,8 @@ server {
         proxy_read_timeout 300s;
         proxy_connect_timeout 300s;
         proxy_send_timeout 300s;
-    }
-}
+    }}
+}}
 EOF
 sudo systemctl restart nginx
 
