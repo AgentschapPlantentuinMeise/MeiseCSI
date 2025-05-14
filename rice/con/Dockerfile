@@ -12,12 +12,13 @@ WORKDIR /app
 # CSI code
 ENV TZ="Europe/Brussels"
 ENV PATH=/home/app/.local/bin/:$PATH
-ENV FLASK_APP=mbg.csi:create_app
+ENV FLASK_APP=mbg.csi:app
 ENV FLASK_RUN_HOST=0.0.0.0
 
 #COPY --from=projectroot . .
 COPY --chown=app:app . .
 RUN pip install .
 
+WORKDIR /app/src
 EXPOSE 5000
 CMD ["flask", "run"]

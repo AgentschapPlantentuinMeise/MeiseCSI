@@ -12,6 +12,7 @@ license = {text = "MIT"}
 dependencies = [
     'flask',
     'Flask-IAM',
+    'Flask-Bauto',
     'phonenumbers',
     'pandas',
     'requests',

@@ -210,13 +210,15 @@ sudo su -l - mcsi <<"EOF"
   git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
   cd MeiseCSI
   docker build -t localhost/webapp -f rice/con/Dockerfile .
+  docker run -d -p 5000:5000 --name mcsiserver localhost/webapp
 EOF
 
 # Enable ssl/https -> domain name required
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
-
+sudo certbot -n --agree-tos --nginx --domains "www.notebooks.guardin.net" -m christophe.vanneste@plantentuinmeise.be
+    
 # Mail server
 ## hostname has to match MX record forwarding server name
 sudo bash -c 'echo mcsi.guardin.net > /etc/hostname'
