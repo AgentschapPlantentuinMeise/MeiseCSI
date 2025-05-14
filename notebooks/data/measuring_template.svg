@@ -1,0 +1,13 @@
+<svg width="210mm" height="297mm" viewBox="0 0 210 297" xmlns="http://www.w3.org/2000/svg">
+  <!-- Corner squares -->
+  <rect x="10" y="10" width="10" height="10" fill="black"/>
+  <rect x="190" y="10" width="10" height="10" fill="black"/>
+  <rect x="10" y="277" width="10" height="10" fill="none" stroke="black"/>
+  <rect x="190" y="277" width="10" height="10" fill="none" stroke="black"/>
+
+  <!-- Middle horizontal line squares, positioned 1 cm away from center, on the sides -->
+  <rect x="10" y="145.5" width="10" height="10" fill="black"/>
+  <rect x="190" y="145.5" width="10" height="10" fill="black"/>
+  <rect x="10" y="161.5" width="10" height="10" fill="none" stroke="black"/>
+  <rect x="190" y="161.5" width="10" height="10" fill="none" stroke="black"/>
+</svg>

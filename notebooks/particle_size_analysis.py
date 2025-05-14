@@ -2,10 +2,30 @@
  "cells": [
   {
    "cell_type": "code",
-   "execution_count": null,
+   "execution_count": 1,
    "id": "eabc2e61-df6a-43c0-b858-3785df90b201",
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Defaulting to user installation because normal site-packages is not writeable\n",
+      "Requirement already satisfied: opencv-python in /home/christophe/.local/lib/python3.10/site-packages (4.11.0.86)\n",
+      "Requirement already satisfied: scikit-image in /home/christophe/.local/lib/python3.10/site-packages (0.25.2)\n",
+      "Requirement already satisfied: imutils in /home/christophe/.local/lib/python3.10/site-packages (0.5.4)\n",
+      "Requirement already satisfied: numpy>=1.17.3 in /home/christophe/.local/lib/python3.10/site-packages (from opencv-python) (2.2.3)\n",
+      "Requirement already satisfied: lazy-loader>=0.4 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (0.4)\n",
+      "Requirement already satisfied: packaging>=21 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (24.2)\n",
+      "Requirement already satisfied: scipy>=1.11.4 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (1.15.2)\n",
+      "Requirement already satisfied: tifffile>=2022.8.12 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (2025.3.30)\n",
+      "Requirement already satisfied: pillow>=10.1 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (11.1.0)\n",
+      "Requirement already satisfied: imageio!=2.35.0,>=2.33 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (2.37.0)\n",
+      "Requirement already satisfied: networkx>=3.0 in /home/christophe/.local/lib/python3.10/site-packages (from scikit-image) (3.4.2)\n",
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
    "source": [
     "%pip install opencv-python scikit-image imutils"
    ]

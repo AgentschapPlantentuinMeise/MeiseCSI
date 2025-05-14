@@ -24,3 +24,8 @@ You can install pulumi with the package manager of your OS
 
     pulumi env init mcsi/dev
     
+### Build container
+
+    docker build -t mcsi -f rice/con/Dockerfile .
+    docker run -v /c/Users/$USERNAME/repos/MeiseCSI:/app -p 5000:5000 -it mcsi /bin/bash
+

@@ -166,6 +166,26 @@ server {{
     location / {{
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
+        proxy_pass http://localhost:5000;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+    }}
+}}
+server {{
+    listen 80;
+    server_name www.notebooks.guardin.net;
+    client_max_body_size 50M;
+    location / {{
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
         proxy_pass http://localhost:8008;
         proxy_set_header Connection "";
         proxy_http_version 1.1;
@@ -287,4 +307,11 @@ mcsi_mail = aws.route53.Record("mcsi-mail",
     type=aws.route53.RecordType.MX,
     ttl=300,
     records=['10 mcsi.guardin.net']
+)
+notebooks_domain = aws.route53.Record("www.notebooks",
+    zone_id=zone.zone_id,
+    name="www.notebooks.guardin.net",
+    type=aws.route53.RecordType.A,
+    ttl=300,
+    records=[server.public_ip]
 )
