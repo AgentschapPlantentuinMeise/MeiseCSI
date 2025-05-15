@@ -200,8 +200,8 @@ server {{
     }}
 }}
 server {{
-    listen 5050;
-    server_name www.notebooks.guardin.net;
+    listen 80;
+    server_name dev.mcsi.guardin.net;
     client_max_body_size 50M;
     location / {{
         proxy_set_header Host \$host;
@@ -237,6 +237,7 @@ EOF
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
 sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
+sudo certbot -n --agree-tos --nginx --domains "dev.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
 sudo certbot -n --agree-tos --nginx --domains "www.notebooks.guardin.net" -m christophe.vanneste@plantentuinmeise.be
     
 # Mail server
