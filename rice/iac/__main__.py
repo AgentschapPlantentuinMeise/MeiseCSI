@@ -130,7 +130,7 @@ git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
 cp -r MeiseCSI/notebooks /home/ubuntu/notebooks
 chmod o+w /home/ubuntu/notebooks
 cd /home/ubuntu/notebooks
-sudo docker run -d -p 8008:8000 \
+sudo docker run -d -p 8008:8000 -p 5050:5050 \
     -v /home/ubuntu/notebooks:/srv/jupyterhub/notebooks \
     --name jupyterhub quay.io/jupyterhub/jupyterhub jupyterhub \
     --Authenticator.allow_all=True \
@@ -187,6 +187,26 @@ server {{
         proxy_set_header Host \$host;
         proxy_set_header X-Real-IP \$remote_addr;
         proxy_pass http://localhost:8008;
+        proxy_set_header Connection "";
+        proxy_http_version 1.1;
+
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header X-Forwarded-Proto \$scheme;
+
+        proxy_read_timeout 300s;
+        proxy_connect_timeout 300s;
+        proxy_send_timeout 300s;
+    }}
+}}
+server {{
+    listen 5050;
+    server_name www.notebooks.guardin.net;
+    client_max_body_size 50M;
+    location / {{
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_pass http://localhost:5050;
         proxy_set_header Connection "";
         proxy_http_version 1.1;
 
