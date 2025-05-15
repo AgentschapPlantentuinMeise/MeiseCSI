@@ -34,6 +34,6 @@ class CSI(AutoBlueprint):
     def show_species(self) -> str:
         return 'test'
 
-bs = BullStack(__name__, [CropSourceInvestigations(enable_crud=True)])
+bs = BullStack(__name__, [CSI(enable_crud=True)])
 
 app = bs.app
