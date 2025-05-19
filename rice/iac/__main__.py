@@ -324,6 +324,13 @@ mcsi_domain = aws.route53.Record("mcsi",
     ttl=300,
     records=[server.public_ip]
 )
+mcsi_dev_domain = aws.route53.Record("mcsi-dev",
+    zone_id=zone.zone_id,
+    name="dev.mcsi.guardin.net",
+    type=aws.route53.RecordType.A,
+    ttl=300,
+    records=[server.public_ip]
+)
 mcsi_mail = aws.route53.Record("mcsi-mail",
     zone_id=zone.zone_id,
     name="mcsi.guardin.net",
