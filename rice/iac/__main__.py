@@ -7,6 +7,8 @@ from pulumi_aws import s3
 
 # Configuration
 config = pulumi.Config()
+domain_name = config.get("domain-name")
+project_name = pulumi.get_project()
 
 # Autotagging - https://www.pulumi.com/blog/automatically-enforcing-aws-resource-tagging-policies/
 non_taggable = {'aws:route53/record:Record'} # Add resource types that should not be tagged
@@ -28,9 +30,14 @@ register_auto_tags({
     'user:Cost Center': config.require('costCenter'),
 })
 
-# Create an AWS S3 Bucket
-bucket = s3.BucketV2('mcsi')
-pulumi.export('mcsi_bucket_name', bucket.id)
+# Create and protect domain name
+#Domain registration can also be handled by pulumi
+#however more secure in aws console:
+#https://us-east-1.console.aws.amazon.com/route53/domains/home?region=eu-west-3#/DomainSearch
+#domain = aws.route53domains.Domain(
+#    domain_name.replace('.','_'), name=domain_name,
+#    opts=pulumi.ResourceOptions(protect=True)  # Prevents deletion
+#)
 
 # Server
 ## Security
@@ -97,6 +104,10 @@ security_group = aws.ec2.SecurityGroup(
         }
     ]
 )
+
+# Create an AWS S3 Bucket
+bucket = s3.BucketV2(project_name, opts=pulumi.ResourceOptions(protect=True))
+pulumi.export(f"{project_name}_bucket_name", bucket.id)
 
 #ssh-keygen -t rsa -b 2048 -f mcsi # execute in ~/.ssh folder
 #chmod g-r mcsi

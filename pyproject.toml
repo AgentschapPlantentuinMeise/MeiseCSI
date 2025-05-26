@@ -13,6 +13,7 @@ dependencies = [
     'flask',
     'Flask-IAM',
     'Flask-Bauto',
+    'Bull-Stack',
     'phonenumbers',
     'pandas',
     'requests',
