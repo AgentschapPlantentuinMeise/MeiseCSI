@@ -320,38 +320,41 @@ pulumi.export('publicIp', server.public_ip)
 pulumi.export('publicDns', server.public_dns)
 
 ## Domain routing
-zone = aws.route53.get_zone(name="guardin.net")
-www = aws.route53.Record("www.mcsi",
+zone = aws.route53.get_zone(name=domain_name)
+www = aws.route53.Record(
+    f"{domain_name.replace('.','_')}-www",
     zone_id=zone.zone_id,
-    name="www.mcsi.guardin.net",
+    name=f"www.{domain_name}",
     type=aws.route53.RecordType.A,
     ttl=300,
     records=[server.public_ip]
 )
-mcsi_domain = aws.route53.Record("mcsi",
+root_domain = aws.route53.Record(
+    f"{domain_name.replace('.','_')}-root",
     zone_id=zone.zone_id,
-    name="mcsi.guardin.net",
+    name=domain_name,
     type=aws.route53.RecordType.A,
     ttl=300,
     records=[server.public_ip]
 )
-mcsi_dev_domain = aws.route53.Record("mcsi-dev",
+dev_domain = aws.route53.Record(
+    f"{domain_name.replace('.','_')}-dev",
     zone_id=zone.zone_id,
-    name="dev.mcsi.guardin.net",
+    name=f"dev.{domain_name}",
     type=aws.route53.RecordType.A,
     ttl=300,
     records=[server.public_ip]
 )
-mcsi_mail = aws.route53.Record("mcsi-mail",
-    zone_id=zone.zone_id,
-    name="mcsi.guardin.net",
+mail_domain = aws.route53.Record(
+    f"{domain_name.replace('.','_')}-mail",
+    name=f"mail.{domain_name}",
     type=aws.route53.RecordType.MX,
     ttl=300,
-    records=['10 mcsi.guardin.net']
+    records=["10 {domain_name}"]
 )
 notebooks_domain = aws.route53.Record("www.notebooks",
     zone_id=zone.zone_id,
-    name="www.notebooks.guardin.net",
+    name=f"www.notebooks.{domain_name}",
     type=aws.route53.RecordType.A,
     ttl=300,
     records=[server.public_ip]
