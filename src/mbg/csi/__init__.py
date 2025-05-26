@@ -1,24 +1,33 @@
-from flask_bauto import AutoBlueprint, BullStack, dataclass
+from flask_bauto import AutoBlueprint, dataclass, relationship
+from bull_stack import BullStack
 
 #Crop source investigations
-class CSI(AutoBlueprint):
+class Taxonomy(AutoBlueprint):
     @dataclass
     class Genus:
         name: str
         family: str
-        #species_rel: relationship = relationship('Species', backref="genus")
+        species: relationship = None
 
     @dataclass 
     class Species:
         genus_id: int
         name: str
+        gbif_id: int
 
+    @dataclass
+    class Crop:
+        species_id: int
+        name: str
+        description: str = None
+        
+class CSI(AutoBlueprint):
     @dataclass
     class Project:
         name: str
         description: str = None
-        #samples: relationship
-
+        sample: relationship = None
+        
     @dataclass
     class Provenance:
         name: str
@@ -28,12 +37,20 @@ class CSI(AutoBlueprint):
     @dataclass
     class Sample:
         name: str
+        project_id: int
         species_id: int
         provenance_id: int= None
     
     def show_species(self) -> str:
         return 'test'
 
-bs = BullStack(__name__, [CSI(enable_crud=True)])
+bs = BullStack(
+    __name__,
+    [
+        Taxonomy(enable_crud=True, forensics=True),
+        CSI(enable_crud=True, url_prefix=False, forensics=True)
+    ]
+)
+bs.create_app()
 
 app = bs.app
