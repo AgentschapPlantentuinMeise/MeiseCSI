@@ -126,7 +126,7 @@ jupyterusers_secret = config.require_secret('jupyterusersSecret')
 ### To retrieve values in config, e.g. jupyteradminSecret: pulumi config get jupyteradminSecret
 
 ## Installation script
-def create_user_data(admin_secret, users_secret):
+def create_user_data(admin_secret, users_secret, project_name, domain_name):
     return  f"""#!/bin/bash
 #user_data script is executed as root
 echo 'Executed as' $(whoami) # $USER, whoami, id -nu or logname
@@ -169,10 +169,10 @@ sudo docker exec jupyterhub sh -c "echo 'admin:"$(openssl passwd -6 '{admin_secr
 
 # Nginx
 sudo rm /etc/nginx/sites-enabled/default
-sudo sh -c "cat - > /etc/nginx/sites-enabled/mcsi" <<EOF
+sudo sh -c "cat - > /etc/nginx/sites-enabled/{project_name}" <<EOF
 server {{
     listen 80;
-    server_name www.mcsi.guardin.net;
+    server_name www.{domain_name};
     client_max_body_size 50M;
     location / {{
         proxy_set_header Host \$host;
@@ -192,7 +192,7 @@ server {{
 }}
 server {{
     listen 80;
-    server_name www.notebooks.guardin.net;
+    server_name www.notebooks.{domain_name};
     client_max_body_size 50M;
     location / {{
         proxy_set_header Host \$host;
@@ -212,7 +212,7 @@ server {{
 }}
 server {{
     listen 80;
-    server_name dev.mcsi.guardin.net;
+    server_name dev.{domain_name};
     client_max_body_size 50M;
     location / {{
         proxy_set_header Host \$host;
@@ -247,14 +247,14 @@ EOF
 # Enable ssl/https -> domain name required
 sudo snap install --classic certbot
 sudo ln -s /snap/bin/certbot /usr/bin/certbot
-sudo certbot -n --agree-tos --nginx --domains "www.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
-sudo certbot -n --agree-tos --nginx --domains "dev.mcsi.guardin.net" -m christophe.vanneste@plantentuinmeise.be
-sudo certbot -n --agree-tos --nginx --domains "www.notebooks.guardin.net" -m christophe.vanneste@plantentuinmeise.be
+sudo certbot -n --agree-tos --nginx --domains "www.{domain_name}" -m christophe.vanneste@plantentuinmeise.be
+sudo certbot -n --agree-tos --nginx --domains "dev.{domain_name}" -m christophe.vanneste@plantentuinmeise.be
+sudo certbot -n --agree-tos --nginx --domains "www.notebooks.{domain_name}" -m christophe.vanneste@plantentuinmeise.be
     
 # Mail server
 ## hostname has to match MX record forwarding server name
-sudo bash -c 'echo mcsi.guardin.net > /etc/hostname'
-sudo debconf-set-selections <<< "postfix postfix/mailname string mcsi.guardin.net"
+sudo bash -c 'echo {domain_name} > /etc/hostname'
+sudo debconf-set-selections <<< "postfix postfix/mailname string {domain_name}"
 sudo debconf-set-selections <<< "postfix postfix/main_mailer_type string 'Internet Site'"
 sudo apt install --assume-yes postfix
 sudo apt install -y dovecot-imapd dovecot-pop3d
@@ -263,9 +263,9 @@ sudo systemctl enable postfix
 sudo systemctl start dovecot
 sudo systemctl enable dovecot
 sudo postconf -e 'home_mailbox = Maildir/'
-sudo bash -c 'echo info@mcsi.guardin.net ubuntu@mcsi.guardin.net > /etc/postfix/virtual'
+sudo bash -c 'echo info@{domain_name} ubuntu@{domain_name} > /etc/postfix/virtual'
 # Virtual post mapping
-sudo postconf -e 'virtual_alias_domains = mcsi.guardin.net'
+sudo postconf -e 'virtual_alias_domains = {domain_name}'
 sudo postconf -e 'virtual_alias_maps = hash:/etc/postfix/virtual'
 sudo postmap /etc/postfix/virtual
 sudo postfix reload
@@ -286,11 +286,11 @@ sudo apt install -y mailutils
 sudo postconf -e 'smtp_tls_security_level = may'
 sudo postconf -e 'smtpd_tls_security_level = may'
 #sudo postconf -e 'smtp_tls_note_starttls_offer = yes'
-#sudo postconf -e 'smtpd_tls_key_file = etc/letsencrypt/live/mcsi.guardin.net/privkey.pem'
-#sudo postconf -e 'smtpd_tls_cert_file = /etc/letsencrypt/live/mcsi.guardin.net/fullchain.pem'
+#sudo postconf -e 'smtpd_tls_key_file = etc/letsencrypt/live/{domain_name}/privkey.pem'
+#sudo postconf -e 'smtpd_tls_cert_file = /etc/letsencrypt/live/{domain_name}/fullchain.pem'
 #sudo postconf -e 'smtpd_tls_loglevel = 1'
 #sudo postconf -e 'smtpd_tls_received_header = yes'
-sudo postconf -e 'myhostname = mcsi.guardin.net'
+sudo postconf -e 'myhostname = {domain_name}'
 sudo systemctl restart postfix.service
 
 
@@ -302,12 +302,12 @@ sudo systemctl restart postfix.service
 user_data = pulumi.Output.all(
     jupyteradmin_secret, jupyterusers_secret
 ).apply(
-    lambda secrets: create_user_data(*secrets)
+    lambda secrets: create_user_data(*secrets, project_name=project_name, domain_name=domain_name)
 )
 
 ## EC2 Instance
 server = aws.ec2.Instance(
-    'mcsi-server',
+    f"{domain_name.replace('.','-')}-server",
     instance_type = 't4g.micro', # 2 vCPU 2 GiB #'t2.micro', # 1 vCPU 1 GiB mem free tier 
     ami="ami-0ae03246fb6acdee9", # for t2.micro ami-06e02ae7bdac6b938
     user_data=user_data,
@@ -322,7 +322,7 @@ pulumi.export('publicDns', server.public_dns)
 ## Domain routing
 zone = aws.route53.get_zone(name=domain_name)
 www = aws.route53.Record(
-    f"{domain_name.replace('.','_')}-www",
+    f"{domain_name.replace('.','-')}-www",
     zone_id=zone.zone_id,
     name=f"www.{domain_name}",
     type=aws.route53.RecordType.A,
@@ -330,7 +330,7 @@ www = aws.route53.Record(
     records=[server.public_ip]
 )
 root_domain = aws.route53.Record(
-    f"{domain_name.replace('.','_')}-root",
+    f"{domain_name.replace('.','-')}-root",
     zone_id=zone.zone_id,
     name=domain_name,
     type=aws.route53.RecordType.A,
@@ -338,7 +338,7 @@ root_domain = aws.route53.Record(
     records=[server.public_ip]
 )
 dev_domain = aws.route53.Record(
-    f"{domain_name.replace('.','_')}-dev",
+    f"{domain_name.replace('.','-')}-dev",
     zone_id=zone.zone_id,
     name=f"dev.{domain_name}",
     type=aws.route53.RecordType.A,
@@ -346,13 +346,15 @@ dev_domain = aws.route53.Record(
     records=[server.public_ip]
 )
 mail_domain = aws.route53.Record(
-    f"{domain_name.replace('.','_')}-mail",
+    f"{domain_name.replace('.','-')}-mail",
+    zone_id=zone.zone_id,
     name=f"mail.{domain_name}",
     type=aws.route53.RecordType.MX,
     ttl=300,
     records=["10 {domain_name}"]
 )
-notebooks_domain = aws.route53.Record("www.notebooks",
+notebooks_domain = aws.route53.Record(
+    f"{domain_name.replace('.','-')}-notebooks",
     zone_id=zone.zone_id,
     name=f"www.notebooks.{domain_name}",
     type=aws.route53.RecordType.A,
