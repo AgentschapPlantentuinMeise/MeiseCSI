@@ -47,9 +47,15 @@ class CSI(AutoBlueprint):
 bs = BullStack(
     __name__,
     [
-        Taxonomy(enable_crud=True, forensics=True),
-        CSI(enable_crud=True, url_prefix=False, forensics=True)
-    ]
+        Taxonomy(
+            enable_crud=True, forensics=True
+        ),
+        CSI(
+            enable_crud=True, url_prefix=False,
+            index_page='csi/index.html', forensics=True
+        )
+    ],
+    logo = 'images/Copilot_20250530_143949.png'
 )
 bs.create_app()
 

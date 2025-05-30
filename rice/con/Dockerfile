@@ -17,7 +17,7 @@ ENV FLASK_RUN_HOST=0.0.0.0
 
 #COPY --from=projectroot . .
 COPY --chown=app:app . .
-RUN pip install .
+RUN pip install .[fullstack]
 
 WORKDIR /app/src
 EXPOSE 5000
