@@ -39,7 +39,7 @@ class CSI(AutoBlueprint):
     class BatchProcessStep:
         batch_id: int
         protocol_id: int
-        #batch_output: list[int] = None
+        batch_output: list[int] = None
 
     @dataclass
     class BatchOutput:
