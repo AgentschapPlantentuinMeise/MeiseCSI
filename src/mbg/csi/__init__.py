@@ -1,5 +1,6 @@
-from flask_bauto import AutoBlueprint, dataclass, relationship
+from flask_bauto import AutoBlueprint, dataclass
 from bull_stack import BullStack
+from pathlib import Path
 
 #Crop source investigations
 class Taxonomy(AutoBlueprint):
@@ -7,7 +8,7 @@ class Taxonomy(AutoBlueprint):
     class Genus:
         name: str
         family: str
-        species: relationship = None
+        species: list[int] = None
 
     @dataclass 
     class Species:
@@ -26,36 +27,63 @@ class CSI(AutoBlueprint):
     class Project:
         name: str
         description: str = None
-        sample: relationship = None
+        batch: list[int] = None
+
+    @dataclass
+    class Batch: # A batch of samples that undergo the same analysis protocols
+        project_id: int
+        sample: list[int] = None
+        batch_process_step: list[int] = None
+
+    @dataclass
+    class BatchProcessStep:
+        batch_id: int
+        protocol_id: int
+        #batch_output: list[int] = None
+
+    @dataclass
+    class BatchOutput:
+        batch_process_step_id: int
+        file: Path = None
+        annotation: str = None
         
     @dataclass
     class Provenance:
         name: str
         polygon: str = None
         description: str = None
-        
+    
     @dataclass
     class Sample:
         name: str
-        project_id: int
+        batch_id: int
         species_id: int
         provenance_id: int= None
-    
-    def show_species(self) -> str:
-        return 'test'
+        sample_output: list[int] = None
 
+    @dataclass
+    class SampleOutput:
+        sample_id: int
+        file: Path = None
+        annotation: str = None
+
+class Documentation(AutoBlueprint):
+    @dataclass
+    class Protocol:
+        name: str
+        description: str
+        _view_function = 'show_protocol'
+
+    def show_protocol(self, protocol_id) -> str:
+        return 'test'
+         
 bs = BullStack(
     __name__,
     [
-        Taxonomy(
-            enable_crud=True, forensics=True
-        ),
-        CSI(
-            enable_crud=True, url_prefix=False,
-            index_page='csi/index.html', forensics=True
-        )
-    ],
-    logo = 'images/Copilot_20250530_143949.png'
+        Taxonomy(enable_crud=True, forensics=True),
+        CSI(enable_crud=True, url_prefix=False, forensics=True),
+        Documentation(enable_crud=True, forensics=True)
+    ]
 )
 bs.create_app()
 
