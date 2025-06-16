@@ -1,3 +1,4 @@
+import os
 from flask_bauto import AutoBlueprint, dataclass
 from bull_stack import BullStack
 from pathlib import Path
@@ -39,7 +40,7 @@ class CSI(AutoBlueprint):
     class BatchProcessStep:
         batch_id: int
         protocol_id: int
-        #batch_output: list[int] = None
+        batch_output: list[int] = None
 
     @dataclass
     class BatchOutput:
@@ -81,9 +82,14 @@ bs = BullStack(
     __name__,
     [
         Taxonomy(enable_crud=True, forensics=True),
-        CSI(enable_crud=True, url_prefix=False, forensics=True),
+        CSI(
+            enable_crud=True, url_prefix=False, forensics=True,
+            index_page='csi/index.html'
+        ),
         Documentation(enable_crud=True, forensics=True)
-    ]
+    ],
+    sql_db_uri='sqlite:///mcsi.db',
+    admin_init_password=os.getenv('BADMIN_INIT','ton')
 )
 bs.create_app()
 

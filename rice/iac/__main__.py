@@ -119,14 +119,17 @@ key_pair = aws.ec2.KeyPair('mcsi-key-pair', public_key=public_key)
 pulumi.export('key_pair_name', key_pair.key_name)
 
 ## Secrets
-db_key_value = config.require_secret('dbKey')
+badmin_secret = config.require_secret('bsKey') # Bull-Stack app init admin key
+db_key_value = config.require_secret('dbKey') # Bull-Stack db connection key
 jupyteradmin_secret = config.require_secret('jupyteradminSecret')
 jupyterusers_secret = config.require_secret('jupyterusersSecret')
 
 ### To retrieve values in config, e.g. jupyteradminSecret: pulumi config get jupyteradminSecret
 
 ## Installation script
-def create_user_data(admin_secret, users_secret, project_name, domain_name):
+def create_user_data(
+        badmin_secret, admin_secret, users_secret, project_name, domain_name
+):
     return  f"""#!/bin/bash
 #user_data script is executed as root
 echo 'Executed as' $(whoami) # $USER, whoami, id -nu or logname
@@ -241,7 +244,9 @@ sudo su -l - mcsi <<"EOF"
   git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
   cd MeiseCSI
   docker build -t localhost/webapp -f rice/con/Dockerfile .
-  docker run -d -p 5000:5000 --name mcsiserver localhost/webapp
+  docker run -d -p 5000:5000 \
+    -e BADMIN_INIT='{badmin_secret}' \
+    --name mcsiserver localhost/webapp
 EOF
 
 # Enable ssl/https -> domain name required
@@ -300,7 +305,7 @@ sudo systemctl restart postfix.service
 
 # Use apply() to resolve the secrets before passing them into user_data
 user_data = pulumi.Output.all(
-    jupyteradmin_secret, jupyterusers_secret
+    badmin_secret, jupyteradmin_secret, jupyterusers_secret
 ).apply(
     lambda secrets: create_user_data(*secrets, project_name=project_name, domain_name=domain_name)
 )

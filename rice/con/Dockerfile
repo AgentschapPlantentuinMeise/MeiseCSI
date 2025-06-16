@@ -1,5 +1,7 @@
 # syntax=docker/dockerfile:1
 # Build from git root with following command:
+# docker build -t mcsi -f rice/con/Dockerfile .
+# Other option using build-context
 # docker build -t mcsi:latest --build-context projectroot=. rice/con
 FROM python:3.12-rc-bullseye
 
