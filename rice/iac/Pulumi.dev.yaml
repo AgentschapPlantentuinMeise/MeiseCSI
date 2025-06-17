@@ -7,3 +7,5 @@ config:
   mcsi:jupyteradminSecret: admin$6385
   mcsi:jupyterusersSecret: workshop$3645
   mcsi:domain-name: meise-csi.be
+  mcsi:bsKey:
+    secure: AAABANA0RUTCNUBRBv+1y2hD8XIlQLURqdRrvs3gNCR1sZYjLcCmSQ==

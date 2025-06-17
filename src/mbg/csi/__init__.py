@@ -84,7 +84,7 @@ bs = BullStack(
         Taxonomy(enable_crud=True, forensics=True),
         CSI(
             enable_crud=True, url_prefix=False, forensics=True,
-            index_page='csi/index.html'
+            index_page='csi/index.html', logo='static/Copilot_20250530_143949.png'
         ),
         Documentation(enable_crud=True, forensics=True)
     ],
