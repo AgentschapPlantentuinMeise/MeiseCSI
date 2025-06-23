@@ -1,6 +1,7 @@
 import os
 from flask_bauto import AutoBlueprint, dataclass
 from bull_stack import BullStack
+from typing import Annotated
 from pathlib import Path
 
 #Crop source investigations
