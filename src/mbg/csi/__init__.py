@@ -45,7 +45,7 @@ class CSI(AutoBlueprint):
     @dataclass
     class BatchOutput:
         batch_process_step_id: int
-        file: Path = None
+        file: Annotated[Path,{'storage_location':'batch_output'}] = None
         annotation: str = None
         
     @dataclass
@@ -65,7 +65,7 @@ class CSI(AutoBlueprint):
     @dataclass
     class SampleOutput:
         sample_id: int
-        file: Path = None
+        file: Annotated[Path,{'storage_location':'sample_output'}] = None
         annotation: str = None
 
 class Documentation(AutoBlueprint):

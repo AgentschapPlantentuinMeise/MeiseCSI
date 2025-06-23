@@ -243,9 +243,12 @@ sudo su -l - mcsi <<"EOF"
   mkdir ~/repos && cd ~/repos
   git clone https://github.com/AgentschapPlantentuinMeise/MeiseCSI.git
   cd MeiseCSI
-  docker build -t localhost/webapp -f rice/con/Dockerfile .
+  docker build --build-arg USER_ID=$(id -u) --build-arg GROUP_ID=$(id -g) \
+    -t localhost/webapp -f rice/con/Dockerfile .
+  mkdir -p ~/instance/{{batch_output,sample_output}}
   docker run -d -p 5000:5000 \
     -e BADMIN_INIT='{badmin_secret}' \
+    -v ~/instance:/app/src/instance \
     --name mcsiserver localhost/webapp
 EOF
 

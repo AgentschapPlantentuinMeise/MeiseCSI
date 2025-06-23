@@ -6,8 +6,13 @@
 FROM python:3.12-rc-bullseye
 
 # root installs
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
-RUN addgroup --system app && adduser --system --group app
+# Create group and user with specific IDs
+RUN addgroup --gid ${GROUP_ID} app && \
+    adduser --uid ${USER_ID} --gid ${GROUP_ID} --system --disabled-password app
+
 USER app
 WORKDIR /app
 
