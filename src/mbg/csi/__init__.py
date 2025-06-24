@@ -23,6 +23,23 @@ class Taxonomy(AutoBlueprint):
         species_id: int
         name: str
         description: str = None
+
+class Services(AutoBlueprint):
+    @dataclass
+    class RequestQuote:
+        project: str
+        description: str
+        samples: int
+        #icpoes: bool
+        #icpms: bool
+        #isotopes: bool
+        #customer: int
+        #offer_send: bool = False
+
+    @dataclass
+    class Order:
+        request_quote_id: int
+        accept_conditions: str #bool
         
 class CSI(AutoBlueprint):
     @dataclass
@@ -60,7 +77,11 @@ class CSI(AutoBlueprint):
         name: str
         batch_id: int
         species_id: int
-        provenance_id: int= None
+        provenance_id: int = None
+        weight: float = None
+        volume: float = None
+        mad_pos: str = None
+        oes_pos: str = None
         sample_output: list[int] = None
 
     @dataclass
@@ -83,13 +104,15 @@ bs = BullStack(
     __name__,
     [
         Taxonomy(enable_crud=True, forensics=True),
+        Services(enable_crud=True, forensics=False),
         CSI(
-            enable_crud=True, url_prefix=False, forensics=True,
+            enable_crud=True, url_prefix=False,
+            fair_data=True, forensics=True,
             index_page='csi/index.html'
         ),
         Documentation(enable_crud=True, forensics=True)
     ],
-    logo='static/Copilot_20250530_143949.png',
+    logo='images/Copilot_20250530_143949.png',
     sql_db_uri='sqlite:///mcsi.db',
     admin_init_password=os.getenv('BADMIN_INIT','ton')
 )
