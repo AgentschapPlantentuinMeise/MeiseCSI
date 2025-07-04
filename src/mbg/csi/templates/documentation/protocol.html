@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+  {{ page | safe }}
+
+  <h2>Book resources on time</h2>
+  <ul>
+  {% for agenda in agendas %}
+    <li><a href="{{ agenda.url }}">{{ agenda.resource }}</a></li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock content %}

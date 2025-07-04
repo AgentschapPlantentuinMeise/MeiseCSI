@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+
+<div class="container">
+  <h1>Standard operating protocols</h1>
+  <table class="table table-hover">
+    <tr>
+      <th>SOP</th>
+      <th>Resource agendas</th>
+      <th>Version</th>
+      <th>Responsible</th>
+    </tr>
+    {% for protocol in protocols %}
+    <tr>
+      <td>
+	<a href="/documentation/protocol/view/{{ protocol.id }}">
+	  {{ protocol.name }}
+	</a>
+      </td>
+      <td>{{ protocol.agenda_list | length }}</td>
+      <td>{{ protocol.version }}</td>
+      <td>{{ protocol.responsible }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+</div>
+{% endblock content %}

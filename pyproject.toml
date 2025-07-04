@@ -14,6 +14,7 @@ dependencies = [
     'Flask-IAM',
     'Flask-Bauto',
     'Bull-Stack',
+    'markdown',
     'phonenumbers',
     'pandas',
     'requests',
