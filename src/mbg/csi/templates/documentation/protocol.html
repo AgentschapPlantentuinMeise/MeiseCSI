@@ -7,10 +7,13 @@
   {{ page | safe }}
 
   <h2>Book resources on time</h2>
-  <ul>
+  <div>
   {% for agenda in agendas %}
-    <li><a href="{{ agenda.url }}">{{ agenda.resource }}</a></li>
-    {% endfor %}
-  </ul>
+    <h3>
+      {{ agenda.resource }} <a href="{{ agenda.url }}">+ Add event</a>
+    </h3>
+    {{ agenda.iframe | safe }}
+  {% endfor %}
+  </div>
 </div>
 {% endblock content %}

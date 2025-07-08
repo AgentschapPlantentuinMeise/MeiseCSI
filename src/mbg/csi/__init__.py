@@ -1,4 +1,5 @@
 import os
+import datetime
 from flask_bauto import AutoBlueprint, dataclass, render_template
 from flask_bauto.types import url
 from bull_stack import BullStack
@@ -13,11 +14,14 @@ class Taxonomy(AutoBlueprint):
         family: str
         species: list[int] = None
 
+        def __repr__(self):
+            return self.name
+
     @dataclass 
     class Species:
         genus_id: int
         name: str
-        gbif_id: int
+        gbif_id: int = None
 
         def __repr__(self):
             return f"{self.genus.name} {self.name}"
@@ -27,6 +31,9 @@ class Taxonomy(AutoBlueprint):
         species_id: int
         name: str
         description: str = None
+
+        def __repr__(self):
+            return f"{self.name} ({self.species})"
 
 class Services(AutoBlueprint):
     @dataclass
@@ -52,11 +59,17 @@ class CSI(AutoBlueprint):
         description: str = None
         batch: list[int] = None
 
+        def __repr__(self):
+            return f"{self.name} (id: {self.id})"
+        
     @dataclass
     class Batch: # A batch of samples that undergo the same analysis protocols
         project_id: int
         sample: list[int] = None
         batch_process_step: list[int] = None
+
+        def __repr__(self):
+            return f"Batch-{self.id}"
 
     @dataclass
     class BatchProcessStep:
@@ -64,11 +77,17 @@ class CSI(AutoBlueprint):
         protocol_id: int
         batch_output: list[int] = None
 
+        def __repr__(self):
+            return f"{self.batch}: step {self.protocol}"
+
     @dataclass
     class BatchOutput:
         batch_process_step_id: int
         file: Annotated[Path,{'storage_location':'batch_output'}] = None
         annotation: str = None
+
+        def __repr__(self):
+            return f"{self.batch_process_step} output: {self.file.get('filename','None')}"
         
     @dataclass
     class Provenance:
@@ -86,10 +105,13 @@ class CSI(AutoBlueprint):
         species_id: int
         provenance_id: int = None
         weight: float = None
-        volume: float = None
+        volume: float = 50
         mad_pos: str = None
         oes_pos: str = None
         sample_output: list[int] = None
+
+        def __repr__(self):
+            return f"{self.name} (id: {self.id})"
 
     @dataclass
     class SampleOutput:
@@ -97,6 +119,53 @@ class CSI(AutoBlueprint):
         file: Annotated[Path,{'storage_location':'sample_output'}] = None
         annotation: str = None
 
+class Accounting(AutoBlueprint):
+    @dataclass
+    class Product:
+        name: str
+        description: str
+        
+    @dataclass
+    class PriceComparison:
+        reference: str
+        date: datetime.date
+        description: str = 'See product description'
+        monopoly: bool = False
+        product_offer: list[int] = None
+
+    @dataclass
+    class ProductOffer:
+        product_id: int
+        price_comparison_id: int
+        vendor: str
+        url: url
+        value: float
+        delivery_cost: float
+        extra_cost: float
+        vat_included: bool
+        vat: float
+        currency: tuple[str] = ('€','$')
+        product_score: list[int] = None
+
+    @dataclass
+    class ScoreCategory:
+        name: str
+        weight: float
+        score_increases: bool
+        
+    @dataclass
+    class ProductScore:
+        product_offer_id: int
+        score_category_id: int
+        score: float
+
+    @dataclass
+    class Inventory:
+        product_id: int
+        stock: int
+        quantity_per_stock: float
+        quantity_metric: str
+        
 class Documentation(AutoBlueprint):
     @dataclass
     class Protocol:
@@ -107,11 +176,15 @@ class Documentation(AutoBlueprint):
         agenda: list[int] = None
         _view_function = 'show_protocol'
 
+        def __repr__(self):
+            return f"{self.name} (v{self.version})"
+
     @dataclass
     class Agenda:
         protocol_id: int
         resource: str
         url: url
+        iframe: str = None
 
     def index(self):
         protocols = {
@@ -139,18 +212,22 @@ class Documentation(AutoBlueprint):
 bs = BullStack(
     __name__,
     [
-        Taxonomy(enable_crud=True, forensics=True),
-        Services(enable_crud=True, forensics=False),
+        Services(
+            enable_crud=True, forensics=False, url_prefix=False,
+            index_page='csi/index.html', index_menu='Overview CSI services'
+        ),
+        Taxonomy(enable_crud=True, forensics=True, index_page=None),
         CSI(
-            enable_crud=True, url_prefix=False,
-            fair_data=True, forensics=True,
+            enable_crud=True, fair_data=False, forensics=True,
             index_page='csi/index.html'
         ),
+        Accounting(enable_crud=True, forensics=True, index_page=None),
         Documentation(enable_crud=True, forensics=True, index_menu='Overview SOPs')
     ],
     logo='images/Copilot_20250530_143949.png',
     sql_db_uri='sqlite:///mcsi.db',
-    admin_init_password=os.getenv('BADMIN_INIT','ton')
+    admin_init_password=os.getenv('BADMIN_INIT','ton'),
+    db_migration=True
 )
 bs.create_app()
 

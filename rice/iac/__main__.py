@@ -321,7 +321,7 @@ server = aws.ec2.Instance(
     user_data=user_data,
     vpc_security_group_ids=[security_group.id],
     key_name=key_pair.key_name,
-    root_block_device={"volume_size": 10}
+    root_block_device={"volume_size": 20}
 )
 
 pulumi.export('publicIp', server.public_ip)
