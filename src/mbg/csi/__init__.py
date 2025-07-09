@@ -1,6 +1,6 @@
 import os
 import datetime
-from flask_bauto import AutoBlueprint, dataclass, render_template
+from flask_bauto import AutoBlueprint, dataclass, render_template, redirect
 from flask_bauto.types import url
 from bull_stack import BullStack
 from typing import Annotated
@@ -51,6 +51,9 @@ class Services(AutoBlueprint):
     class Order:
         request_quote_id: int
         accept_conditions: bool
+
+    def contact(self) -> '/contact':
+        return redirect('/request_quote/create')
         
 class CSI(AutoBlueprint):
     @dataclass
@@ -214,7 +217,7 @@ bs = BullStack(
     [
         Services(
             enable_crud=True, forensics=False, url_prefix=False,
-            index_page='csi/index.html', index_menu='Overview CSI services'
+            index_page='services/index.html', index_menu='Overview CSI services'
         ),
         Taxonomy(enable_crud=True, forensics=True, index_page=None),
         CSI(

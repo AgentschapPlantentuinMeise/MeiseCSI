@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Meise Crop Source Investigations{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<section class="position-relative text-white">
+  <img src="{{ url_for('static', filename='images/hero-banner.jpg') }}"
+       alt="Meise Botanic Garden Laboratory"
+       class="img-fluid w-100">
+  <div style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%);"
+       class="text-center px-3">
+    <h1 class="display-4">Meise Botanic Garden</h1>
+    <h2 class="h3">Crop Source Investigations Laboratory</h2>
+    <p class="lead">
+      ICP-OES Analysis for Reference Databases &amp; EUDR Case Work
+    </p>
+  </div>
+</section>
+
+<div class="container py-5">
+  <p class="mb-5">
+    Our laboratory specializes in Inductively Coupled Plasma Optical
+    Emission Spectrometry (ICP-OES), providing essential analytical
+    services for building reference databases and supporting EUDR
+    case work investigations.
+  </p>
+
+  <hr>
+
+  <!-- Services -->
+  <h3 class="text-center mb-4">Our Services</h3>
+  <br />
+  <div class="row text-center">
+    <div class="col-md-3 col-sm-6 mb-4">
+      <img src="{{ url_for('static', filename='icons/icp-oes.png') }}"
+           alt="ICP-OES Instrument"
+           width="80"
+           class="mb-2">
+      <p>Advanced elemental analysis for botanical specimens</p>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-4">
+      <img src="{{ url_for('static', filename='icons/leaf-data.png') }}"
+           alt="Plant Leaf with Data Points"
+           width="80"
+           class="mb-2">
+      <p>Data-driven insights for crop source verification</p>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-4">
+      <img src="{{ url_for('static', filename='icons/database.png') }}"
+           alt="Database Stack"
+           width="80"
+           class="mb-2">
+      <p>Comprehensive reference database development</p>
+    </div>
+    <div class="col-md-3 col-sm-6 mb-4">
+      <img src="{{ url_for('static', filename='icons/shield.png') }}"
+           alt="Regulation Shield"
+           width="80"
+           class="mb-2">
+      <p>Reliable support for EUDR compliance and case analysis</p>
+    </div>
+  </div>
+
+  <!-- Process Flow -->
+  <section class="text-center my-5">
+    <h3 class="mb-4">Our Workflow</h3>
+    <img src="{{ url_for('static', filename='images/process-flow.png') }}"
+         alt="Sample → ICP-OES Analysis → Data Processing → EUDR Report"
+         class="img-fluid mx-auto">
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="bg-light p-4 rounded mb-5">
+    <h3 class="mb-3">Why Choose Us?</h3>
+    <p>
+      With a commitment to scientific excellence, our laboratory ensures
+      accurate, reproducible, and high-quality results tailored to the
+      needs of researchers and regulatory professionals.
+    </p>
+  </section>
+
+  <!-- Call to Action -->
+  <div class="text-center">
+    <a href="/contact" class="btn btn-primary btn-lg">
+      Contact Us for a Consultation
+    </a>
+  </div>
+</div>
+{% endblock content %}
+
+{% block scripts %}
+  {{ super() }}
+{% endblock scripts %}
