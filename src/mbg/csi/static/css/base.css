@@ -1,0 +1,14 @@
+.hero-overlay h1 {
+  /* min 2rem, preferred 8vw, max 6rem */
+  font-size: clamp(2rem, 8vw, 4.5rem);
+}
+
+.hero-overlay h2 {
+  font-size: clamp(1.25rem, 5vw, 2.5rem);
+  line-height: 1.3;
+}
+
+.hero-overlay p {
+  font-size: clamp(1rem, 3vw, 1.375rem);
+  line-height: 1.5;
+}

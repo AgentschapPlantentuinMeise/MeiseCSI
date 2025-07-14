@@ -1,7 +1,7 @@
 import os
 import datetime
 from flask_bauto import AutoBlueprint, dataclass, render_template, redirect
-from flask_bauto.types import url
+from flask_bauto.types import Route, url
 from bull_stack import BullStack
 from typing import Annotated
 from pathlib import Path
@@ -52,8 +52,24 @@ class Services(AutoBlueprint):
         request_quote_id: int
         accept_conditions: bool
 
-    def contact(self) -> '/contact':
-        return redirect('/request_quote/create')
+    @dataclass
+    class Contact:
+        name: str
+        email: str
+        request: Annotated[str,{'min_size':250}]
+
+    def test(self) -> str:
+        return 'test'
+    
+    def contact(self) -> Route(
+            '/contact', roles=False,
+            methods=('GET','POST'), return_type=str, menu_label='Contact'
+    ):
+        return self.create(
+            'contact',
+            success_template='services/index.html',
+            success_template_kwargs={}
+        )
         
 class CSI(AutoBlueprint):
     @dataclass
@@ -216,7 +232,7 @@ bs = BullStack(
     __name__,
     [
         Services(
-            enable_crud=True, forensics=False, url_prefix=False,
+            enable_crud=False, forensics=False, url_prefix=False,
             index_page='services/index.html', index_menu='Overview CSI services'
         ),
         Taxonomy(enable_crud=True, forensics=True, index_page=None),
