@@ -115,6 +115,10 @@ class CSI(AutoBlueprint):
             return self.name
 
     @dataclass
+    class SampleType:
+        name: str
+    
+    @dataclass
     class Sample:
         name: str
         batch_id: int
