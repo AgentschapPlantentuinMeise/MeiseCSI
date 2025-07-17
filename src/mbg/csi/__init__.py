@@ -58,9 +58,6 @@ class Services(AutoBlueprint):
         email: str
         request: Annotated[str,{'min_size':250}]
 
-    def test(self) -> str:
-        return 'test'
-    
     def contact(self) -> Route(
             '/contact', roles=False,
             methods=('GET','POST'), return_type=str, menu_label='Contact'
@@ -116,14 +113,18 @@ class CSI(AutoBlueprint):
 
         def __repr__(self):
             return self.name
-    
+
     @dataclass
     class Sample:
         name: str
         batch_id: int
-        species_id: int
+        sample_type_id: int = None
+        species_id: int = None
+        location: str = None
         provenance_id: int = None
+        label: list[int] = None
         weight: float = None
+        weight_unit: tuple[str] = ('g','mg')
         volume: float = 50
         mad_pos: str = None
         oes_pos: str = None
@@ -132,6 +133,12 @@ class CSI(AutoBlueprint):
         def __repr__(self):
             return f"{self.name} (id: {self.id})"
 
+    @dataclass
+    class Label:
+        sample_id: int
+        name: str
+        value: str = None
+    
     @dataclass
     class SampleOutput:
         sample_id: int
