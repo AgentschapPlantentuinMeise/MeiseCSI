@@ -29,3 +29,30 @@ You can install pulumi with the package manager of your OS
     docker build -t mcsi -f rice/con/Dockerfile .
     docker run -v /c/Users/$USERNAME/repos/MeiseCSI:/app -p 5000:5000 -it mcsi /bin/bash
 
+### Update container on live server
+
+    sudo su - -l mcsi
+    docker stop mcsiserver
+    docker remove mcsiserver
+    cd repos/MeiseCSI/
+    git pull origin
+    docker build --build-arg USER_ID=$(id -u) \
+    --build-arg GROUP_ID=$(id -g) \
+    -t localhost/webapp -f rice/con/Dockerfile .
+    docker run -d -p 5000:5000 -e BADMIN_INIT='ton~1873' -v
+    ~/instance:/app/src/instance --name mcsiserver localhost/webapp
+    docker exec -it mcsiserver /bin/bash
+    mkdir migrations
+    flask db init
+
+If you need to remove previous migrations
+
+    import sqlite3
+    conn = sqlite3.connect('instance/mcsi.db')
+    cursor = conn.cursor()
+    cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    print(cursor.fetchall())
+    cursor.execute("DELETE FROM alembic_version;")
+    conn.commit()
+    conn.close()
+

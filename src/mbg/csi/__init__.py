@@ -128,7 +128,7 @@ class CSI(AutoBlueprint):
         provenance_id: int = None
         label: list[int] = None
         weight: float = None
-        weight_unit: tuple[str] = ('g','mg')
+        #weight_unit: tuple[str] = ('g','mg')
         volume: float = 50
         mad_pos: str = None
         oes_pos: str = None
