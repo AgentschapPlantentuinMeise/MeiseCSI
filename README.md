@@ -44,6 +44,9 @@ You can install pulumi with the package manager of your OS
     docker exec -it mcsiserver /bin/bash
     mkdir migrations
     flask db init
+    flask db migrate -m'new migration'
+    flask db upgrade
+    
 
 If you need to remove previous migrations
 
